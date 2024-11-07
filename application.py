@@ -3,12 +3,10 @@ from flask import Flask, request, render_template, jsonify
 from openai import OpenAI
 from src.components.nutrition_calculate import calculate_nutrition
 
-# import openai
-# OPENAI_API_KEY="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"
+
 app = Flask(__name__)
 client = OpenAI(
     api_key=os.environ.get("OPENAI_API_KEY"),
-    # api_key=OPENAI_API_KEY,
     base_url="https://api.perplexity.ai"
 )
 # Home route
