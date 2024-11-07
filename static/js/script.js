@@ -24,10 +24,12 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 const recipeHTML = `
                     <div class="recipe-content">
-                        <div class="recipe-instructions">
-                            ${data.recipe}
+                        <div class="recipe-title">
+                            <h2>${data.description || 'Generated Recipe'}</h2>
                         </div>
-                        
+                        <div class="recipe-instructions">
+                            ${formatRecipe(data.recipe)}
+                        </div>
                         <div class="nutrition-section">
                             <h3>Nutritional Information (per serving)</h3>
                             <table class="nutrient-table">
@@ -67,6 +69,34 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.textContent = 'Generate Recipe';
         });
     });
+
+    // Helper function to format recipe text
+    function formatRecipe(text) {
+        // Replace markdown headers with HTML
+        text = text.replace(/### (.*?)\n/g, '<h3>$1</h3>');
+        text = text.replace(/#### (.*?)\n/g, '<h4>$1</h4>');
+        
+        // Format bold text
+        text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        
+        // Format lists
+        text = text.replace(/- (.*?)(?=\n|$)/g, '<li>$1</li>');
+        
+        // Wrap lists in ul tags
+        text = text.replace(/(<li>.*?<\/li>)\n/g, '<ul>$1</ul>');
+        
+        // Format paragraphs
+        text = text.split('\n').map(line => {
+            line = line.trim();
+            if (line && !line.startsWith('<')) {
+                return `<p>${line}</p>`;
+            }
+            return line;
+        }).join('');
+        
+        return text;
+    }
+
     // Smooth scrolling for navigation links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
