@@ -50,4 +50,5 @@ def generate_recipe_endpoint():
         return jsonify({"error": "Failed to generate recipe. Please try again."}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.getenv("PORT", 5000))  # Use 5000 as default if PORT is not set
+    app.run(host="0.0.0.0", port=port)
