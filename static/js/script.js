@@ -3,6 +3,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const submitBtn = document.getElementById('submit-btn');
     const recipeOutput = document.getElementById('recipe-output');
     const recipeDisplay = document.getElementById('recipe-display');
+    const chatWidget = document.getElementById('chat-widget');
+    const chatToggle = document.getElementById('chat-toggle');
+    const chatContent = document.getElementById('chat-content');
+    const closeChat = document.getElementById('close-chat');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const chatMessages = document.getElementById('chat-messages');
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -58,6 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
                 recipeOutput.innerHTML = recipeHTML;
+                showChatWidget();
             }
         })
         .catch(error => {
@@ -70,22 +78,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Helper function to format recipe text
     function formatRecipe(text) {
-        // Replace markdown headers with HTML
         text = text.replace(/### (.*?)\n/g, '<h3>$1</h3>');
         text = text.replace(/#### (.*?)\n/g, '<h4>$1</h4>');
-        
-        // Format bold text
         text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        
-        // Format lists
         text = text.replace(/- (.*?)(?=\n|$)/g, '<li>$1</li>');
-        
-        // Wrap lists in ul tags
         text = text.replace(/(<li>.*?<\/li>)\n/g, '<ul>$1</ul>');
-        
-        // Format paragraphs
         text = text.split('\n').map(line => {
             line = line.trim();
             if (line && !line.startsWith('<')) {
@@ -93,11 +91,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             return line;
         }).join('');
-        
         return text;
     }
 
-    // Smooth scrolling for navigation links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
@@ -107,7 +103,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // FAQ accordion functionality
     const accordionHeaders = document.querySelectorAll('.accordion-header');
     accordionHeaders.forEach(header => {
         header.addEventListener('click', function() {
@@ -120,4 +115,35 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    function showChatWidget() {
+        chatWidget.classList.remove('hidden');
+    }
+
+    function toggleChatContent() {
+        chatContent.classList.toggle('hidden');
+    }
+
+    chatToggle.addEventListener('click', toggleChatContent);
+    closeChat.addEventListener('click', toggleChatContent);
+
+    chatForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const message = chatInput.value.trim();
+        if (message) {
+            addMessage('user', message);
+            chatInput.value = '';
+            setTimeout(() => {
+                addMessage('bot', `You said: ${message}`);
+            }, 1000);
+        }
+    });
+
+    function addMessage(sender, text) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', sender);
+        messageElement.textContent = text;
+        chatMessages.appendChild(messageElement);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
 });
