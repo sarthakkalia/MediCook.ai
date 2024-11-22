@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatForm = document.getElementById('chat-form');
     const chatInput = document.getElementById('chat-input');
     const chatMessages = document.getElementById('chat-messages');
+    const menuToggleButton = document.getElementById('menu-toggle-button');
+    const navLinks = document.getElementById('nav-links');
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -115,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-
+    
     function showChatWidget() {
         chatWidget.classList.remove('hidden');
     }
@@ -146,4 +148,25 @@ document.addEventListener('DOMContentLoaded', function() {
         chatMessages.appendChild(messageElement);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
+
+    menuToggleButton.addEventListener('click', function() {
+        navLinks.classList.toggle('active');
+    });
+
+    document.addEventListener('click', function(event) {
+        const isClickInsideNav = navLinks.contains(event.target);
+        const isClickOnToggle = menuToggleButton.contains(event.target);
+
+        if (!isClickInsideNav && !isClickOnToggle && navLinks.classList.contains('active')) {
+            navLinks.classList.remove('active');
+        }
+    });
+
+    // Close menu when clicking on a link
+    navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', function() {
+            navLinks.classList.remove('active');
+        });
+    });
 });
+
