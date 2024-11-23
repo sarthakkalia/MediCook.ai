@@ -87,6 +87,7 @@ nav {
     max-width: 800px;
     margin: 0 auto;
     padding: 0 20px;
+    top: 162px;
 }
 
 h1 {
@@ -504,4 +505,9 @@ footer {
     .nav-links {
         display: flex !important;
     }
+}
+
+
+section#home {
+    height: 700px;
 }
