@@ -1,8 +1,10 @@
 import os
+import requests
 from flask import Flask, request, render_template, jsonify
 from openai import OpenAI
 from src.components.nutrition_calculate import calculate_nutrition
 from src.components.recipe_generate import generate_recipe  # Import from recipe_generate.py
+from src.components.gemmod import gem_modify_recipe  # Import from gemmod.py
 from src.logger import logger
 from src.exception import CustomException
 
@@ -48,6 +50,26 @@ def generate_recipe_endpoint():
     except Exception as e:
         logger.error(f"Unhandled Exception: {e}")
         return jsonify({"error": "Failed to generate recipe. Please try again."}), 500
+
+# Add a new route for handling chatbot queries
+@app.route('/modify_recipe', methods=['POST'])
+def modify_recipe():
+    try:
+        # Get the data from the request
+        data = request.get_json()
+        original_recipe = data.get("recipe")
+        modification_query = data.get("query")
+        
+        if not original_recipe or not modification_query:
+            return jsonify({"error": "Original recipe and query are required"}), 400
+        
+        # Call the gem_modify_recipe function
+        return gem_modify_recipe(original_recipe, modification_query)
+
+    except Exception as e:
+        logger.error(f"Unhandled Exception: {e}")
+        return jsonify({"error": "An unexpected error occurred."}), 500
+
 
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 5000))  # Use 5000 as default if PORT is not set

@@ -134,12 +134,34 @@ document.addEventListener('DOMContentLoaded', function() {
         const message = chatInput.value.trim();
         if (message) {
             addMessage('user', message);
-            chatInput.value = '';
-            setTimeout(() => {
-                addMessage('bot', `You said: ${message}`);
-            }, 1000);
+            // Get the original recipe
+            const originalRecipe = document.querySelector('.recipe-content .recipe-instructions')?.innerText;
+            // Send the message and original recipe to the backend
+            fetch('/modify_recipe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    recipe: originalRecipe,
+                    query: message
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    addMessage('bot', data.error);
+                } else {
+                    const modifiedRecipe = data.modified_recipe || "Couldn't retrieve the modified recipe.";
+                    addMessage('bot', modifiedRecipe);
+                }
+            })
+            .catch(error => {
+                console.error('Error modifying recipe:', error);
+                addMessage('bot', 'An error occurred while modifying the recipe. Please try again.');
+            });
         }
+        chatInput.value = '';
     });
+    
 
     function addMessage(sender, text) {
         const messageElement = document.createElement('div');
