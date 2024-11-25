@@ -82,6 +82,11 @@ def speech_generate():
     # Directly return the response from text_to_speech
     return text_to_speech(text)
 
+def print_server_info():
+    print("Starting the Flask application...")
+    print("Running on http://127.0.0.1:5000")
+
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 5000))  # Use 5000 as default if PORT is not set
+    print_server_info()
     app.run(host="0.0.0.0", port=port)
