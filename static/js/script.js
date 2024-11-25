@@ -183,9 +183,10 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         const message = chatInput.value.trim();
         if (message) {
-            addMessage('user', message);
+            addMessage('user', escapeHTML(message));
             // Get the original recipe
-            const originalRecipe = document.querySelector('.recipe-content .recipe-instructions')?.innerText;
+            const originalRecipe = document.querySelector('.recipe-content .recipe-instructions')?.innerText || 'No recipe available';
+            
             // Send the message and original recipe to the backend
             fetch('/modify_recipe', {
                 method: 'POST',
@@ -198,41 +199,76 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
-                    addMessage('bot', data.error);
+                    addMessage('bot', `<div class="error-message">Error: ${escapeHTML(data.error)}</div>`);
                 } else {
-                    const modifiedRecipe = data.modified_recipe || "Couldn't retrieve the modified recipe.";
-                    addMessage('bot', modifiedRecipe);
+                    const formattedRecipe = formatRecipe(data.modified_recipe || "Couldn't retrieve the modified recipe.");
+                    addMessage('bot', formattedRecipe, true);
                 }
             })
             .catch(error => {
                 console.error('Error modifying recipe:', error);
-                addMessage('bot', 'An error occurred while modifying the recipe. Please try again.');
+                addMessage('bot', `<div class="error-message">An error occurred while modifying the recipe. Please try again.</div>`);
             });
         }
         chatInput.value = '';
     });
     
-
-    function addMessage(sender, text) {
+    // Helper function to format recipe content with proper HTML structure
+    function formatRecipe(text) {
+        if (!text) return 'No recipe provided.';
+        return text
+            .replace(/### (.*?)\n/g, '<h3>$1</h3>')
+            .replace(/#### (.*?)\n/g, '<h4>$1</h4>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/- (.*?)(?=\n|$)/g, '<li>$1</li>')
+            .replace(/(<li>.*?<\/li>)\n/g, '<ul>$1</ul>')
+            .split('\n')
+            .map(line => `<p>${line.trim()}</p>`)
+            .join('');
+    }
+    
+    // Helper function to display messages in the chat
+    function addMessage(sender, content, isHTML = false) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', sender);
-        messageElement.textContent = text;
-        chatMessages.appendChild(messageElement);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    menuToggleButton.addEventListener('click', function() {
-        navLinks.classList.toggle('active');
-    });
-
-    document.addEventListener('click', function(event) {
-        const isClickInsideNav = navLinks.contains(event.target);
-        const isClickOnToggle = menuToggleButton.contains(event.target);
-
-        if (!isClickInsideNav && !isClickOnToggle && navLinks.classList.contains('active')) {
-            navLinks.classList.remove('active');
+        if (isHTML) {
+            messageElement.innerHTML = content; // Render HTML for bot messages
+        } else {
+            messageElement.textContent = content; // Plain text for user messages
         }
-    });
+        chatMessages.appendChild(messageElement);
+        chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll to the latest message
+    }
+    
+    // Escape HTML to prevent raw tags from appearing in user inputs
+    function escapeHTML(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    
+
+    // function addMessage(sender, text) {
+    //     const messageElement = document.createElement('div');
+    //     messageElement.classList.add('message', sender);
+    //     messageElement.textContent = text;
+    //     chatMessages.appendChild(messageElement);
+    //     chatMessages.scrollTop = chatMessages.scrollHeight;
+    // }
+
+    // menuToggleButton.addEventListener('click', function() {
+    //     navLinks.classList.toggle('active');
+    // });
+
+    // document.addEventListener('click', function(event) {
+    //     const isClickInsideNav = navLinks.contains(event.target);
+    //     const isClickOnToggle = menuToggleButton.contains(event.target);
+
+    //     if (!isClickInsideNav && !isClickOnToggle && navLinks.classList.contains('active')) {
+    //         navLinks.classList.remove('active');
+    //     }
+    // });
 
     // Close menu when clicking on a link
     navLinks.querySelectorAll('a').forEach(link => {

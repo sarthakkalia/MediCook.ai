@@ -19,9 +19,10 @@ def gem_modify_recipe(original_recipe,modification_query):
             return jsonify({"error": "Original recipe and query are required"}), 400
         print("#3")
         prompt = (
-            f"Here is the original recipe:\n{original_recipe}\n\n"
-            f"The user wants the following modification:\n{modification_query}\n\n"
-            "Please provide the updated recipe."
+            f"The recipe has been generated based on the user's request:\n{original_recipe}\n\n"
+            f"User's Query:\n{modification_query}\n\n"
+            "If the query is not clear or is just a greeting like 'Hi', ask the user to provide a more specific question about the recipe or the ingredients. "
+            "Otherwise, answer the user's query or provide additional information about the recipe."
         )
         response = model.generate_content(prompt)
         return jsonify({"modified_recipe": response.text}), 200
