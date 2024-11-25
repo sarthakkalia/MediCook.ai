@@ -67,6 +67,56 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
                 recipeOutput.innerHTML = recipeHTML;
+                fetch('/text-to-speech', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ text: data.recipe })
+                })
+                .then(ttsResponse => ttsResponse.blob())
+                .then(blob => {
+                    // Create a temporary audio element to play the speech
+                    const audioURL = URL.createObjectURL(blob);
+                    const audio = new Audio(audioURL);
+                    // Create and show the audio icon
+                    const audioIconContainer = document.getElementById('audio-icon-container');
+                    audioIconContainer.innerHTML = ''; // Clear any existing content
+                    const audioIcon = document.createElement('button');
+                    audioIcon.innerHTML = '<img width="50" height="50" src="https://img.icons8.com/ios-filled/50/FFFFFF/speaker.png" alt="speaker"/>'; // Replace with your icon image
+                    audioIcon.classList.add('play-audio');
+                    // Manage audio play/pause state
+                     // Toggle audio play/pause when the button is clicked
+                    audioIcon.addEventListener('click', () => {
+                        if (audio.paused) {
+                            audio.play();
+                        } else {
+                            audio.pause();
+                        }
+                    });
+
+                    // Update icon when the audio starts playing
+                    audio.addEventListener('play', () => {
+                        audioIcon.innerHTML = '<img width="50" height="50" src="https://img.icons8.com/ios-filled/50/FFFFFF/pause.png" alt="pause"/>'; // Pause icon
+                    });
+                    
+                    // Update icon when the audio is paused
+                    audio.addEventListener('pause', () => {
+                        audioIcon.innerHTML = '<img width="50" height="50" src="https://img.icons8.com/ios-filled/50/FFFFFF/speaker.png" alt="speaker"/>'; // Play icon
+                    });
+
+                    // Reset icon when the audio ends
+                    audio.addEventListener('ended', () => {
+                        audioIcon.innerHTML = '<img width="50" height="50" src="https://img.icons8.com/ios-filled/50/FFFFFF/speaker.png" alt="speaker"/>'; // Play icon
+                    });
+                    
+                    audioIconContainer.appendChild(audioIcon);
+                    
+                    // Make the audio icon visible
+                    audioIconContainer.classList.remove('hidden');
+                })
+                .catch(error => {
+                    console.error('Error generating speech:', error);
+                });
+
                 showChatWidget();
             }
         })

@@ -5,6 +5,7 @@ from openai import OpenAI
 from src.components.nutrition_calculate import calculate_nutrition
 from src.components.recipe_generate import generate_recipe  # Import from recipe_generate.py
 from src.components.gemmod import gem_modify_recipe  # Import from gemmod.py
+from src.components.text_to_speech import text_to_speech
 from src.logger import logger
 from src.exception import CustomException
 
@@ -70,6 +71,16 @@ def modify_recipe():
         logger.error(f"Unhandled Exception: {e}")
         return jsonify({"error": "An unexpected error occurred."}), 500
 
+@app.route("/text-to-speech", methods=["POST"])
+def speech_generate():
+    # Get the text input from the request
+    print("#56")
+    text = request.form.get("text")
+    if not text:
+        return "No text provided", 400
+    
+    # Directly return the response from text_to_speech
+    return text_to_speech(text)
 
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 5000))  # Use 5000 as default if PORT is not set
